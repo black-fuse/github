@@ -9,48 +9,34 @@ def create_game_board():
             buttons[i][j] = button
 
 def button_click(row, col):
-    if buttons[row][col]["text"] == "":
-        if current_player == "X":
-            buttons[row][col]["text"] = "X"
-            buttons[row][col]["fg"] = "blue"
-        else:
-            buttons[row][col]["text"] = "O"
-            buttons[row][col]["fg"] = "red"
-        check_winner()
+    if game_over or buttons[row][col]["text"] != "":
+        return
+    
+    buttons[row][col]["text"] = current_player
+    buttons[row][col]["fg"] = "blue" if current_player == "X" else "red"
+    if check_winner():
+        winner_label.config(text=f"{current_player} wins!")
+    elif all(buttons[i][j]["text"] for i in range(3) for j in range(3)):
+        winner_label.config(text="It's a draw!")
+    else:
         switch_player()
 
 def check_winner():
     global game_over
-    # Check rows
     for i in range(3):
-        if buttons[i][0]["text"] == buttons[i][1]["text"] == buttons[i][2]["text"] != "":
+        if (buttons[i][0]["text"] == buttons[i][1]["text"] == buttons[i][2]["text"] != "" or
+            buttons[0][i]["text"] == buttons[1][i]["text"] == buttons[2][i]["text"] != ""):
             game_over = True
-            winner_label.config(text=f"{buttons[i][0]['text']} wins!")
-            break
-    # Check columns
-    for i in range(3):
-        if buttons[0][i]["text"] == buttons[1][i]["text"] == buttons[2][i]["text"] != "":
-            game_over = True
-            winner_label.config(text=f"{buttons[0][i]['text']} wins!")
-            break
-    # Check diagonals
-    if buttons[0][0]["text"] == buttons[1][1]["text"] == buttons[2][2]["text"] != "":
+            return True
+    if (buttons[0][0]["text"] == buttons[1][1]["text"] == buttons[2][2]["text"] != "" or
+        buttons[0][2]["text"] == buttons[1][1]["text"] == buttons[2][0]["text"] != ""):
         game_over = True
-        winner_label.config(text=f"{buttons[0][0]['text']} wins!")
-    elif buttons[0][2]["text"] == buttons[1][1]["text"] == buttons[2][0]["text"] != "":
-        game_over = True
-        winner_label.config(text=f"{buttons[0][2]['text']} wins!")
-    # Check for draw
-    if not game_over and all(buttons[i][j]["text"] != "" for i in range(3) for j in range(3)):
-        game_over = True
-        winner_label.config(text="It's a draw!")
+        return True
+    return False
 
 def switch_player():
     global current_player
-    if current_player == "X":
-        current_player = "O"
-    else:
-        current_player = "X"
+    current_player = "O" if current_player == "X" else "X"
 
 def reset_game():
     global game_over, current_player
